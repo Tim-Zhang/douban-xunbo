@@ -1,6 +1,6 @@
 {
-	"name": "XunBoDouBan",
-	"version": "1.0.2",
+	"name": "迅播网豆瓣插件",
+	"version": "1.0.3",
 	"manifest_version": 2,
 	"description": "在迅播电影页面显示豆瓣评分",
 	"content_scripts": [{
@@ -8,7 +8,11 @@
 		"js": ["jquery.min.js", "douban.js"]
 	}],
 	"browser_action": {
-		"default_icon": "xunbo.png"
+		"default_icon": "icon16.png"
+	},
+	"icons": {
+		"16": "icon16.png",
+		"48": "icon48.png"
 	},
 	"permissions": [
 		"storage",
