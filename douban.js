@@ -1,25 +1,38 @@
 var searchUrl = 'http://api.douban.com/v2/movie/search?q='
 
 var searchMovie = function(name) {
-	var url = searchUrl + encodeURI(name);
-	return Promise.resolve($.get(url));
+	var movieInStore, url
+
+	movieInStore = getStorage(name);
+	if (movieInStore) return Promise.resolve(movieInStore);
+
+	url = searchUrl + encodeURI(name);
+	return Promise.resolve($.get(url)).then(function(data) {
+		if (data.count === 0) return Promise.reject();
+
+		return setStorage(name, data.subjects[0]);
+	});
 }
 
 var isSinglePage = function() {
 	return /\/Html\/\w+\.html/.test(location.pathname);
 }
 
-var process50ResultPage = function() {
-	$('div.hotbox.hotlist ul li a').each(function() {
-		var name = $(this).text()
-		  , names = name.split('/')
-		  , firstName = names[0]
+var setStorage = function(name, value) {
+  name = name;
+  window.sessionStorage[name] = typeof value === 'object' ? JSON.stringify(value) : value;
+  return value;
+}
 
-		searchMovie(firstName).then(function(data) {
-			console.log(data);
-		});
-
-	})
+var getStorage = function(name) {
+  var data, e, error;
+  data = window.sessionStorage[name];
+  try {
+    data = JSON.parse(data);
+  } catch (error) {
+    e = error;
+  }
+  return data || '';
 }
 
 var processSinglePage = function() {
@@ -28,22 +41,22 @@ var processSinglePage = function() {
 		  , firstName = names[0]
 		  , result
 
-		searchMovie(firstName).then(function(data) {
-			if (data.count === 0) {
-				result = '豆瓣没找到结果'
-			} else {
-				var subject = data.subjects[0]
-				  , rating  = subject.rating.average
-				  , poster  = subject.images.large
-				  , url     = subject.alt
+		searchMovie(firstName).then(function(subject) {
+			var rating  = subject.rating.average
+			  , poster  = subject.images.large
+			  , url     = subject.alt
 
-				result = '<a href="' + url + '">豆瓣评分' + rating + '</a>'
-			}
-
-			result = $('<div>').html(result);
-
-			$('.info').eq(0).append(result);
+			result = '<a style="color: #072;" href="' + url + '">豆瓣评分 ' + rating + '</a>'
+			render(result);
+		}).catch(function() {
+			render('豆瓣没找到结果');
 		});
+}
+
+var render = function(content) {
+	var style = 'font-size: 16px; margin-left: 5px; padding-left: 9px; border-left: 1px solid #8E8E8E';
+	content = $('<span style="' + style + '">').html(content);
+	$('div.starscore').width('auto').eq(0).append(content);
 }
 
 switch(true) {
@@ -51,5 +64,6 @@ switch(true) {
 		processSinglePage();
 		break;
 }
+
 
 
