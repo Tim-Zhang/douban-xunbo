@@ -1,6 +1,6 @@
 {
 	"name": "迅播网豆瓣插件",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"manifest_version": 2,
 	"description": "在迅播电影页面显示豆瓣评分",
 	"content_scripts": [{

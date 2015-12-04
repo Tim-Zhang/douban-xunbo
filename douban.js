@@ -45,8 +45,14 @@ var processSinglePage = function() {
 			var rating  = subject.rating.average
 			  , poster  = subject.images.large
 			  , url     = subject.alt
+        , text    = ''
 
-			result = '<a style="color: #072;" href="' + url + '">豆瓣评分 ' + rating + '</a>'
+      if (rating)
+        text = '豆瓣评分 ' + rating;
+      else
+        text = '豆瓣评价人数不足';
+
+			result = '<a style="color: #072;" href="' + url + '">' + text + '</a>'
 			render(result);
 		}).catch(function() {
 			render('豆瓣没找到结果');
