@@ -9,7 +9,7 @@ var searchMovie = function(name) {
 
   url = searchUrl + encodeURI(name);
   return fetch(url).then(res => res.json()).then(function(data) {
-    if (data.count === 0) return Promise.reject();
+    if (!data.subjects || !data.subjects.length) return Promise.reject('douban no results')
     return setStorage(name, scoring(data.subjects));
   });
 }
