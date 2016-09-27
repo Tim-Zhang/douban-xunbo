@@ -1,15 +1,22 @@
-var searchUrl = 'http://api.douban.com/v2/movie/search?q='
+var searchUrl = 'https://api.douban.com/v2/movie/search?q='
 
-var searchMovie = function(name) {
-  var movieInStore, url;
+var searchMovie = function(titles, aka) {
+  var title = titles[0], movieInStore, url;
 
-  movieInStore = getStorage(name);
+  movieInStore = getStorage(title);
   if (movieInStore) return Promise.resolve(movieInStore);
 
 
-  url = searchUrl + encodeURI(name);
+  url = searchUrl + encodeURI(title);
   return fetch(url).then(res => res.json()).then(function(data) {
-    if (!data.subjects || !data.subjects.length) return Promise.reject('douban no results')
+    if (!data.subjects || !data.subjects.length) {
+      const titlePartials = titles[0].split(/\s+/)
+      if (titlePartials.length > 1) {
+        titles[0] = titlePartials[0]
+        return searchMovie(titles)
+      }
+      return Promise.reject('douban no results')
+    }
     return setStorage(name, scoring(data.subjects));
   });
 }
@@ -86,11 +93,10 @@ var getStorage = function(name) {
 }
 
 var processSinglePage = function() {
-    var names     = getTitles()
-      , firstName = names[0]
-      , result
+    const titles = getTitles()
+    let result
 
-    searchMovie(firstName).then(function(subject) {
+    searchMovie(titles).then(function(subject) {
       var rating  = subject.rating.average
         , poster  = subject.images.large
         , url     = subject.alt
